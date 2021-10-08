@@ -1,16 +1,28 @@
 import React from 'react';
-import { useRouter } from 'next/router';
-import { getFilteredEvents } from '../../dummy-data';
+import { getFilteredEvents } from '../../helpers/api-utils';
 import EventList from '../../components/events/event-list';
 
-const FilteredEventsPage = () => {
-  const router = useRouter();
-
-  const filteredData = router.query.slug;
-
-  if (!filteredData) {
-    return <p className="center">Loading...</p>;
+const FilteredEventsPage = ({ hasError, events }) => {
+  if (hasError) {
+    return <p>Invalid filter, Please adjust your values!</p>;
   }
+
+  if (!events || events.length === 0) {
+    return <p>No events found for the chosen filter!</p>;
+  }
+
+  return (
+    <div>
+      <EventList items={events} />
+    </div>
+  );
+};
+
+export default FilteredEventsPage;
+
+export async function getServerSideProps(context) {
+  const { params } = context;
+  const filteredData = params.slug;
 
   const year = +filteredData[0];
   const month = +filteredData[1];
@@ -23,20 +35,18 @@ const FilteredEventsPage = () => {
     month < 1 ||
     month > 12
   ) {
-    return <p>Invalid filter, Please adjust your values!</p>;
+    return {
+      props: { hadError: true },
+      // notFound: true,    // Alternative way
+      // redirect: { destination: '/error' },   // Alternative way
+    };
   }
 
-  const filteredEvents = getFilteredEvents({ year, month });
+  const filteredEvents = await getFilteredEvents({ year, month });
 
-  if (!filteredEvents || filteredEvents.length === 0) {
-    return <p>No events found for the chosen filter!</p>;
-  }
-
-  return (
-    <div>
-      <EventList items={filteredEvents} />
-    </div>
-  );
-};
-
-export default FilteredEventsPage;
+  return {
+    props: {
+      events: filteredEvents,
+    },
+  };
+}
