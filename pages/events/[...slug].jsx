@@ -1,23 +1,51 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import Head from 'next/head';
 import { getFilteredEvents } from '../../helpers/api-utils';
 import EventList from '../../components/events/event-list';
 
 const FilteredEventsPage = ({ hasError, events }) => {
+  let pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content="Error occurred" />
+    </Head>
+  );
+
   if (hasError) {
-    return <p>Invalid filter, Please adjust your values!</p>;
+    return (
+      <Fragment>
+        {pageHeadData}
+        <p>Invalid filter, Please adjust your values!</p>
+      </Fragment>
+    );
   }
 
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content="WTF" />
+    </Head>
+  );
+
   if (!events || events.length === 0) {
-    return <p>No events found for the chosen filter!</p>;
+    return (
+      <Fragment>
+        {pageHeadData}
+        <p>No events found for the chosen filter!</p>
+      </Fragment>
+    );
   }
+
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content="All events for month/year" />
+    </Head>
+  );
 
   return (
     <div>
-      <Head>
-        <title>Filtered Events</title>
-        <meta name="description" content={`All events for month/year`} />
-      </Head>
+      {pageHeadData}
       <EventList items={events} />
     </div>
   );
